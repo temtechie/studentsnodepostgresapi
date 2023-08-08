@@ -1,5 +1,5 @@
 const pool = require('../../../db');
-const { getStudentQuery, getSingleStudentQuery, checkIfEmailExist, addNewStudent, removeStudent } = require('../dbqueries/queries');
+const { getStudentQuery, getSingleStudentQuery, checkIfEmailExist, addNewStudent, removeStudent, updateStudentQuery } = require('../dbqueries/queries');
 
 const getStudents = (req, res) => {
     pool.query(getStudentQuery, (error, result) => {
@@ -75,9 +75,27 @@ const deleteStudent = (req, res) => {
             res.send(`No student found with the id ${id}.`);
             return
         }
-        pool.query(removeStudent, [id], (error, result)=>{
-            if(error) throw Error;
+        pool.query(removeStudent, [id], (error, result) => {
+            if (error) throw Error;
             res.status(200).send(`student with the id: ${id} deleted successfully!.`)
+        })
+    })
+}
+
+const updateStudent = (req, res) => {
+    const id = parseInt(req.params.id);
+    const { name } = req.body;
+
+    pool.query(getSingleStudentQuery, [id], (error, result) => {
+        //check if student exist
+        const studentNotFound = !result.rows.length;
+        if (studentNotFound) {
+            res.send(`No student found with the id ${id}.`);
+            return
+        }
+        pool.query(updateStudentQuery, [name, id], (error, result) => {
+            if (error) throw Error;
+            res.status(200).send(`student with the id: ${id} updated successfully!.`);
         })
     })
 }
@@ -88,4 +106,5 @@ module.exports = {
     getSingleStudent,
     addStudent,
     deleteStudent,
+    updateStudent
 }
